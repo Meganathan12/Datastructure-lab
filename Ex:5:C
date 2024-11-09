@@ -1,0 +1,206 @@
+//SCENARIO-1
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+typedef struct Book{
+    char isbn[20];  
+    char title[100];
+    char author[100];
+    float price;
+}Book;
+
+typedef struct Node{
+    Book book;
+    struct Node *left;
+    struct Node *right;
+}Node;
+
+Node* createNode(Book book){
+    Node* newNode=(Node*)malloc(sizeof(Node));
+    newNode->book=book;
+    newNode->left=NULL;
+    newNode->right=NULL;
+    return newNode;
+}
+
+Node* insert(Node* root,Book book){
+    if(root==NULL){
+        return createNode(book);
+    }
+    if(strcmp(book.isbn,root->book.isbn)<0){
+        root->left=insert(root->left,book);
+    }else if(strcmp(book.isbn,root->book.isbn)>0){
+        root->right=insert(root->right,book);
+    }
+    return root;
+}
+
+Book* search(Node* root,const char* isbn){
+    if(root==NULL){
+        return NULL;
+    }
+    if(strcmp(isbn,root->book.isbn)==0){
+        return &root->book;
+    }else if(strcmp(isbn,root->book.isbn)< 0){
+        return search(root->left,isbn);
+    }else{
+        return search(root->right,isbn);
+    }
+}
+
+void displaySorted(Node* root){
+    if(root != NULL){
+        displaySorted(root->left);
+        printf("ISBN: %s,Title: %s,Author: %s,Price: %.2f\n",
+               root->book.isbn,root->book.title,root->book.author,root->book.price);
+        displaySorted(root->right);
+    }
+}
+
+int main(){
+    Node* root=NULL;
+    int choice;
+
+    do{
+        printf("\nMenu:\n");
+        printf("1. Insert a new book\n");
+        printf("2. Search for a book by ISBN\n");
+        printf("3. Display all books\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d",&choice);
+        getchar(); 
+        switch(choice){
+            case 1:{
+                Book newBook;
+                printf("Enter ISBN: ");
+                fgets(newBook.isbn,sizeof(newBook.isbn),stdin);
+                newBook.isbn[strcspn(newBook.isbn,"\n")]=0; 
+
+                printf("Enter Title: ");
+                fgets(newBook.title,sizeof(newBook.title),stdin);
+                newBook.title[strcspn(newBook.title,"\n")]=0; 
+
+                printf("Enter Author: ");
+                fgets(newBook.author,sizeof(newBook.author),stdin);
+                newBook.author[strcspn(newBook.author,"\n")]=0; 
+                printf("Enter Price: ");
+                scanf("%f",&newBook.price);
+                getchar(); 
+
+                root=insert(root,newBook);
+                printf("Book inserted successfully!\n");
+                break;
+            }
+            case 2:{
+                char isbn[20];
+                printf("Enter ISBN to search: ");
+                fgets(isbn,sizeof(isbn),stdin);
+                isbn[strcspn(isbn,"\n")]=0; 
+
+                Book* foundBook=search(root,isbn);
+                if(foundBook != NULL){
+                    printf("Found: ISBN: %s,Title: %s,Author: %s,Price: %.2f\n",
+                           foundBook->isbn,foundBook->title,foundBook->author,foundBook->price);
+                }else{
+                    printf("Book with ISBN %s not found.\n",isbn);
+                }
+                break;
+            }
+            case 3:
+                printf("Books in sorted order:\n");
+                displaySorted(root);
+                break;
+            case 4:
+                printf("Exiting the program.\n");
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }while(choice != 4);
+ return 0;
+}
+
+//Scenario-2
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+struct Node {
+    int student_id;
+    char student_name[50];
+    struct Node* left;
+    struct Node* right;
+};
+
+
+struct Node* create_node(int student_id, char* student_name) {
+    struct Node* new_node = (struct Node*)malloc(sizeof(struct Node));
+    new_node->student_id = student_id;
+    strcpy(new_node->student_name, student_name);
+    new_node->left = new_node->right = NULL;
+    return new_node;
+}
+
+
+struct Node* add_student(struct Node* root, int student_id, char* student_name) {
+    if (root == NULL) {
+        return create_node(student_id, student_name);
+    }
+    if (student_id < root->student_id) {
+        root->left = add_student(root->left, student_id, student_name);
+    } else if (student_id > root->student_id) {
+        root->right = add_student(root->right, student_id, student_name);
+    }
+    return root;
+}
+
+
+struct Node* find_student(struct Node* root, int student_id) {
+    if (root == NULL || root->student_id == student_id) {
+        return root;
+    }
+    if (student_id < root->student_id) {
+        return find_student(root->left, student_id);
+    } else {
+        return find_student(root->right, student_id);
+    }
+}
+
+void in_order_traversal(struct Node* root) {
+    if (root != NULL) {
+        in_order_traversal(root->left);
+        printf("%d ", root->student_id);
+        in_order_traversal(root->right);
+    }
+}
+
+int main() {
+    struct Node* root = NULL;
+
+    
+    root = add_student(root, 123, "Alice");
+    root = add_student(root, 101, "Bob");
+    root = add_student(root, 145, "Charlie");
+
+    
+    int search_id = 101;
+    struct Node* found_student = find_student(root, search_id);
+    if (found_student != NULL) {
+        printf("Student found: %s\n", found_student->student_name);
+    } else {
+        printf("Student with ID %d not found.\n", search_id);
+    }
+
+   
+    printf("All student IDs in ascending order: ");
+    in_order_traversal(root);
+    printf("\n");
+
+    return 0;
+}
